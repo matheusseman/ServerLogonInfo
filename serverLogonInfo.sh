@@ -260,7 +260,7 @@ case $1 in
     "--version" | "--versao" | "version" | "versao" | "-v") # Opção para versionamento do script
         _versaoScript_
     ;;
-    "--help" | "-help" | "help" |"-h") # Opção para ajuda
+    "--help" | "-help" | "help" | "-h") # Opção para ajuda
         _ajudaScript_
     ;;
     *) # Opção principal, quando não passado parametros
