@@ -3,6 +3,8 @@
 ## Descrição
 Este script foi desenvolvido para exibir informações detalhadas após o logon em servidores Linux. Inicialmente, foi criado para funcionar em sistemas da família Debian, sendo implementado, neste exemplo específico, em um servidor Ubuntu Server 22.04 com Zabbix instalado para monitoramento.
 
+![exemplo](https://github.com/matheusseman/ServerLogonInfo/assets/119596051/c89745ea-2974-4022-84c4-f46ae0aac937)
+
 ## Configuração
 O script deve ser alocado no diretório `/usr/local/bin` e sua execução deve ser adicionada ao arquivo `.bashrc` de cada usuário para exibir as informações após o login.
 
