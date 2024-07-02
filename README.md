@@ -31,12 +31,12 @@ Se estas dependências não estiverem instaladas, o script solicitará a permiss
 ## Personalização
 Para configurar o script no servidor, é necessário realizar algumas alterações no script base:
 
-- Atualize o array `SERVICOS` com os nomes dos serviços dos quais deseja exibir informações.
+- Atualize o array `SERVICOS` com os nomes dos serviços dos quais deseja exibir o estado.
 - Atualize o array `PARTICOES` com as partições ao qual deseja exibir informações.
 - Atualize a variável `DESCRICAO_SERVIDOR` com uma descrição sucinta do servidor.
 - Atualize a variável `IMPACTO_SERVIDOR` com:
   - Nível de criticidade do servidor em relação à infraestrutura.
-  - Cor, dependendo do nível de criticidade (Vermelho = Alto, Amarelo = Médio, Azul = Baixo).
+  - Cor, dependendo do nível de criticidade (Alto=vermelho, Médio=amarelo, Baixo=azul).
 
 ## Uso
 O script oferece algumas opções de argumento para facilitar seu uso:
