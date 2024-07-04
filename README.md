@@ -6,7 +6,12 @@ Este script foi desenvolvido para exibir informações detalhadas após o logon 
 ![exemplo](https://github.com/matheusseman/ServerLogonInfo/assets/119596051/c89745ea-2974-4022-84c4-f46ae0aac937)
 
 ## ⚙️ Configuração
-O script deve ser alocado no diretório `/usr/local/bin` e sua execução deve ser adicionada ao arquivo `.bashrc` de cada usuário para exibir as informações após o login.
+O script deve ser alocado no diretório `/usr/local/bin`, receber permissões de execução `chmod a+x serverLogonInfo.sh` e sua execução deve ser adicionada ao arquivo `.bashrc` de cada usuário ao qual deseja exibir as informações após o login, conform exemplo abaixo:
+- Arquivo .bashrc
+
+  ```bash
+  # Script para amostra de informações no login
+  /usr/local/bin/serverLogonInfo.sh
 
 ## 💡 Funcionalidades
 Na sua versão inicial, o script fornece as seguintes informações após o login do usuário:
