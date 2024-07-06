@@ -1,20 +1,20 @@
 # serverLogonInfo.sh
 
 ## 📝 Descrição
-Este script foi desenvolvido para exibir informações detalhadas após o logon em servidores Linux. Inicialmente, foi criado para funcionar em sistemas da família Debian, sendo implementado, neste exemplo específico, em um servidor Ubuntu Server 22.04 com Zabbix instalado para monitoramento.
+Este script foi desenvolvido para exibir informações detalhadas após o logon em servidores Linux. Inicialmente, foi desenvolvido para funcionar em sistemas da família Debian, sendo implementado, neste exemplo específico, em um servidor Ubuntu Server 22.04 com Zabbix instalado para monitoramento.
 
 ![exemplo](https://github.com/matheusseman/ServerLogonInfo/assets/119596051/c89745ea-2974-4022-84c4-f46ae0aac937)
 
 ## ⚙️ Configuração
-O script deve ser alocado no diretório `/usr/local/bin`, receber permissões de execução `chmod a+x serverLogonInfo.sh` e sua execução deve ser adicionada ao arquivo `.bashrc` de cada usuário ao qual deseja exibir as informações após o login, conform exemplo abaixo:
-- Arquivo .bashrc
+O script deve ser alocado no diretório `/usr/local/bin`, receber permissões de execução `chmod a+x serverLogonInfo.sh` e deve ter seu caminho absoluto adicionado ao arquivo `.bashrc` de cada usuário ao qual deseja exibir as informações após o logon, conforme exemplo abaixo:
+- [ Conteúdo do arquivo .bashrc ]
 
   ```bash
   # Script para amostra de informações no login
   /usr/local/bin/serverLogonInfo.sh
 
 ## 💡 Funcionalidades
-Na sua versão inicial, o script fornece as seguintes informações após o login do usuário:
+Em sua versão inicial, o script fornece as seguintes informações após o logon do usuário:
 
 - Nome do servidor
 - Tempo ligado (uptime)
@@ -34,10 +34,10 @@ O script depende dos seguintes pacotes:
 Se estas dependências não estiverem instaladas, o script solicitará a permissão para instalá-las automaticamente.
 
 ## ✏️ Personalização
-Para configurar o script no servidor, é necessário realizar algumas alterações no script base:
+Para configurar o script no servidor, é necessário realizar alguns ajustes no mesmo, para se adaquar ao seu cenário:
 
-- Atualize o array `SERVICOS` com os nomes dos serviços dos quais deseja exibir o estado.
-- Atualize o array `PARTICOES` com as partições ao qual deseja exibir informações.
+- Atualize o array `SERVICOS` com os nomes dos serviços dos quais deseja-se exibir o estado.
+- Atualize o array `PARTICOES` com as partições as quais deseja-se exibir as informações.
 - Atualize a variável `DESCRICAO_SERVIDOR` com uma descrição sucinta do servidor.
 - Atualize a variável `IMPACTO_SERVIDOR` com:
   - Nível de criticidade do servidor em relação à infraestrutura.
@@ -56,4 +56,4 @@ O script oferece algumas opções de argumento para facilitar seu uso:
   ./serverLogonInfo.sh --help
 
 ## 🚀 Futuras Implementações
-Está prevista a adição de informações sobre rotinas de backup Veeam ao script. Essas informações serão apresentadas de outro repositório que será adicionado ao GitHub, incluindo o script responsável por obter as informações das rotinas de backup, as alterações necessárias no script `serverLogonInfo.sh` e a posterior configuração do monitoramento Zabbix para tais informações.
+Está prevista a adição de informações sobre rotinas de backup Veeam ao script. Essas informações serão apresentadas em outro repositório que será adicionado ao GitHub, incluindo o script responsável por obter as informações das rotinas de backup e sua posterior configuração no monitoramento Zabbix.
