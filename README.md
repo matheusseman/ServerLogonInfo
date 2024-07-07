@@ -6,7 +6,7 @@ Este script foi desenvolvido para exibir informações detalhadas após o logon 
 ![exemplo](https://github.com/matheusseman/ServerLogonInfo/assets/119596051/c89745ea-2974-4022-84c4-f46ae0aac937)
 
 ## Funcionalidades
-Na sua versão inicial, o script fornece as seguintes informações após o login do usuário:
+Na sua versão inicial, o script fornece as seguintes informações após o logon do usuário:
 
 - Nome do servidor
 - Tempo ligado (uptime)
