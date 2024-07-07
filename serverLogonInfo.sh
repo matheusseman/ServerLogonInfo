@@ -9,14 +9,16 @@
 #------------------------------------------------------------------------------------------------------------------------#
 ##########################################################################################################################
 #------------------------------------------------------------------------------------------------------------------------#
+# Adicionar última atualização do servidor (update/upgrade)
+#------------------------------------------------------------------------------------------------------------------------#
+##########################################################################################################################
+#------------------------------------------------------------------------------------------------------------------------#
 #------------------------------------------------------ ARRAYS ----------------------------------------------------------#
-
-# Arrays dinâmicos (Devem ser alterados para se adequar a infraestrutura da rede) #--------------------------------------#
-
+# Arrays dinâmicos (Devem ser alterados/adicionados para se adequar a infraestrutura da rede) #--------------------------#
 declare -A PARTICOES=(
         [raiz]="/"
         [boot]="/boot"
-) # Partições para verificação de , adicione mais no formato [descricao]="mountpoint"
+) # Partições para verificação de, adicione mais no formato [descricao]="mountpoint"
 
 declare -a SERVICOS=(
     "zabbix-server" "ssh" "apache2" "mysql"
@@ -25,13 +27,10 @@ declare -a SERVICOS=(
 # Arrays estáticos #-----------------------------------------------------------------------------------------------------#
 declare -A CORES=( 
                 [none]="\033[m"
-                [preto]="\033[1;30m"
                 [vermelho]="\033[1;31m"
                 [verde]="\033[1;32m"
                 [amarelo]="\033[1;33m"
                 [azul]="\033[1;34m"
-                [magenta]="\033[1;35m"
-                [ciano]="\033[1;36m"
                 [branco]="\033[1;37m"
 ) # Cores para melhor visualizaçao dos dados
 
@@ -43,18 +42,14 @@ declare -A DEPENDENCIAS=(
 ##########################################################################################################################
 #------------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------- VARIÁVEIS ---------------------------------------------------------#
-
-# Variáveis dinâmicas #--------------------------------------------------------------------------------------------------#
-DESCRICAO_SERVIDOR="Descrição de função do servidor." # Descrição da função do servidor
-IMPACTO_SERVIDOR="${CORES[vermelho]}Alto${CORES[none]}" # Impacto do servidor na rede
-
-# Variáveis estáticas #--------------------------------------------------------------------------------------------------#
-VERSAO=v1.2 # Versão do script
+VERSAO=v1.3 # Versão do script
 HOST_NOME=$(hostname) # Armazena o hostname do host
-ENDERECO_PUBLICO=$(curl -s ifconfig.me) # Endereço público do host
+ENDERECO_PUBLICO=$(curl -s ifconfig.me 2>/dev/null) # Endereço público do host
 ENDERECO_LOCAL=$(hostname -I | awk '{print $1}') # Endereço local do host
 SCRIPT=${0##*/} # Retorna o nome do script
 SCRIPT_DIR=/usr/local/bin # Local aonde o script é armazenado
+FUNC_SERVIDOR="" # Descrição da função do servidor
+IMPAC_SERVIDOR="" # Impacto do servidor na rede
 DISTRO_INFO="" # Armazena as informações da distribuição do host
 PARTICOES_INFO="" # Armaza informações da raiz do sistema
 SERVICOS_INFO="" # Armazena as informações dos serviços 
@@ -66,37 +61,11 @@ SERVICOS_QNT=0 # Armazena a quantidade dos serviços em execução
 #------------------------------------------------------------------------------------------------------------------------#
 function _principal_() {
     #--------------------------------------------------------------------------------------------------------------------#
-    # Verifica as dependências do script #-------------------------------------------------------------------------------#
-    local instalacaoValidacao="false" # Variável de controle
-    for dependencia in "${!DEPENDENCIAS[@]}" ; do 
-        if [[ ! -e "${DEPENDENCIAS[$dependencia]}" ]] ; then # Caso a dependencia não esteja instalada
-            if [[ $instalacaoValidacao = "false" ]] ; then
-                read -p "Para execução do script, os pacotes bc e curl devem ser adicionados. Deseja prosseguir? [S/N]:" instalacaoForm
-                case $instalacaoForm in 
-                    "não" | "nao" | "Não" | "Nao" | "NÃO" | "NAO" | "n" | "N") 
-                        echo -e "${CORES[branco]}[ ${CORES[amarelo]}!${CORES[none]} ${CORES[branco]}]${CORES[none]} ~ Cancelando instalação..." ; sleep 1
-                        exit 0
-                    ;;
-                    "sim" | "Sim" | "SIM" | "s" | "S") 
-                        instalacaoValidacao="true"
-                    ;;
-                    *)
-                        echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Opção inválida..." ; sleep 1
-                    ;;
-                esac                
-            fi
-            if [[ $instalacaoValidacao = "true" ]] ; then
-                echo -e "${CORES[branco]}[ ${CORES[amarelo]}!${CORES[none]} ${CORES[branco]}]${CORES[none]} ~ Baixando/instalando pacote $dependencia..." ; sleep 1
-                apt-get install $dependencia -y # Faz a instalação das dependencias
-                if [[ $? = 1 ]] ; then
-                    echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Falha na instalação dos pacotes, abortando..." ; sleep 1
-                fi
-            fi
-        fi
-    done
+    # Verificações de dependências #-------------------------------------------------------------------------------------#
+    _verifInstalacao_ 
 
     # Levantamento de informações do S.O #-------------------------------------------------------------------------------#
-    for particao in "${!PARTICOES[@]}" ; do
+    for particao in "${!PARTICOES[@]}" ; do # Percorre o array PARTICOES
         _verifParticao_ $(df ${PARTICOES[$particao]} | grep -v Filesystem | awk '{print $1}')
     done 
 
@@ -117,8 +86,8 @@ function _principal_() {
     _divisor_ "-"
     echo -e "\nServidor: $HOST_NOME (${CORES[amarelo]}Ligado há $uptimeServidor${CORES[none]})"
     echo -e "Distribuição: $DISTRO_INFO"
-    echo -e "Função: $DESCRICAO_SERVIDOR"
-    echo -e "Impacto infraestrutura: $IMPACTO_SERVIDOR"
+    echo -e "Função: $FUNC_SERVIDOR"
+    echo -e "Impacto infraestrutura: $IMPAC_SERVIDOR"
     echo -e "Endereço local: $ENDERECO_LOCAL"
     echo -e "Endereço público: $ENDERECO_PUBLICO"
     echo -e "$PARTICOES_INFO"
@@ -160,6 +129,111 @@ function _divisor_() {
     echo -e "${CORES[amarelo]}#${CORES[branco]}----------------------------------------------------------------------${CORES[amarelo]}#${CORES[none]}"
     #--------------------------------------------------------------------------------------------------------------------#
 } # Função para exibição do separador de texto
+
+function _verifInstalacao_() {
+    #--------------------------------------------------------------------------------------------------------------------#
+    # Validação de dependências #----------------------------------------------------------------------------------------#
+    local instalacaoValidacao="false" # Variável de controle
+    for dependencia in "${!DEPENDENCIAS[@]}" ; do # Percorre o array com as dependências do script
+        if [[ ! -e "${DEPENDENCIAS[$dependencia]}" ]] ; then # Caso a dependencia não esteja instalada
+            if [[ $instalacaoValidacao = "false" ]] ; then
+                while true ; do
+                    read -p "Para execução do script, os pacotes bc e curl devem ser adicionados. Deseja prosseguir? [S/N]: " instalacaoForm
+                    case $instalacaoForm in 
+                        "não" | "nao" | "Não" | "Nao" | "NÃO" | "NAO" | "n" | "N") 
+                            echo -e "${CORES[branco]}[ ${CORES[amarelo]}!${CORES[none]} ${CORES[branco]}]${CORES[none]} ~ Cancelando instalação..." ; sleep 1 ; exit 0                        
+                        ;;
+                        "sim" | "Sim" | "SIM" | "s" | "S") 
+                            instalacaoValidacao="true"
+                            break
+                        ;;
+                        *)
+                            echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Opção inválida..." ; sleep 1
+                        ;;
+                    esac
+                done
+            fi     
+
+            #------------------------------------------------------------------------------------------------------------#
+            # Instalação da dependência #--------------------------------------------------------------------------------#
+            if [[ $instalacaoValidacao = "true" ]] ; then
+                if [ "$(id -u)" != "0" ] ; then # Caso o usuário não seja administrador
+                    echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Operação permitida apenas para administradores, abortando..." ; exit 0
+                else
+                    echo -e "\n${CORES[branco]}[ ${CORES[amarelo]}!${CORES[none]} ${CORES[branco]}]${CORES[none]} ~ Baixando/instalando pacote $dependencia..." ; sleep 1
+
+                    # Em distribuições de família Debian #---------------------------------------------------------------#
+                    if [[ -e "/usr/bin/apt" ]] ; then
+                        apt-get install $dependencia -y ; echo # Faz a instalação das dependencias
+                        if [[ $? = 1 ]] ; then
+                            echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Falha na instalação dos pacotes, abortando..." ; sleep 1 ; exit 0                
+                        fi
+
+                    # Em distribuições de família RedHat #---------------------------------------------------------------#
+                    elif [[ -e "/usr/bin/yum" ]] ; then
+                        yum install $dependencia -y ; echo # Faz a instalação das dependencias
+                        if [[ $? = 1 ]] ; then
+                            echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Falha na instalação dos pacotes, abortando..." ; sleep 1 ; exit 0                
+                        fi
+                    fi
+                fi
+            fi
+        fi
+    done
+
+    # Ações para primeira execução do script #---------------------------------------------------------------------------#
+    if [[ $instalacaoValidacao = "true" ]] ; then  
+        # Função do servidor #-------------------------------------------------------------------------------------------#
+        _divisor_ "-" ; echo
+
+        while true ; do
+            read -p "Descreva de forma sucinta a função do servidor: " funcServidor
+            if [[ ! -z $funcServidor ]] ; then
+                sed -i "s/^FUNC_SERVIDOR=.*/FUNC_SERVIDOR=\"$funcServidor\"/" "$0" ; break
+                break 
+            else
+                echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Valor inválido! Informe a função do servidor.\n" ; sleep 1                
+            fi
+        done
+
+        # Impacto do servidor #------------------------------------------------------------------------------------------#
+        while true; do
+            local regexpImpacto='^[AMB]' # Expressão regular para verificar a primeira letra (A, M, B)
+            read -p "Qual o impacto do mesmo na rede ao qual está instalado? [Alto, Médio, Baixo]: " impacServidor 
+
+            local impactServidorForm=$(echo "${impacServidor:0:1}" | tr '[:lower:]' '[:upper:]') # Obtém o primeiro caractere da variável e formata para maiúsculo
+            if [[ $impactServidorForm =~ $regexpImpacto ]]; then # Verifica se o primeiro caractere corresponde à expressão regular
+                # Cria um arquivo temporário para a atualização
+                case $impactServidorForm in 
+                    "A")
+                        sed -i "s/^IMPAC_SERVIDOR=.*/IMPAC_SERVIDOR=\"\${CORES[vermelho]}Alto\${CORES[none]}\"/" "$0" ; break
+                    ;;
+                    "M")
+                        sed -i "s/^IMPAC_SERVIDOR=.*/IMPAC_SERVIDOR=\"\${CORES[amarelo]}Médio\${CORES[none]}\"/" "$0" ; break
+                    ;;
+                    "B")
+                        sed -i "s/^IMPAC_SERVIDOR=.*/IMPAC_SERVIDOR=\"\${CORES[azul]}Baixo\${CORES[none]}\"/" "$0" ; break
+                    ;;
+                esac
+            else
+                echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Valor inválido, preencha com Alto, Médio ou Baixo." ; sleep 1             
+            fi
+        done
+
+        # Finalização da instalação/configuração #-----------------------------------------------------------------------#
+        echo ; _divisor_ "-"
+
+        echo -e "\n[ ${CORES[verde]}✓${CORES[none]} ] ~ Instalação finalizada!"
+        echo -e "[ ${CORES[amarelo]}!${CORES[none]} ] ~ Adicione manualmente a execução do script ao arquivo .bashrc dos usuários."
+        echo -e "  Exemplo: "
+        echo -e "   [ Conteúdo arquivo /home/usuario/.bashrc ]\n"
+        echo -e "       [ ... ] # Conteúdo já existente no arquivo\n"
+        echo -e "       # Script para amostra de informações no login"
+        echo -e "       /usr/loca/bin/serverLogonInfo.sh\n"
+        exit 0
+    fi
+    #--------------------------------------------------------------------------------------------------------------------#
+} # Função para instalação personalizada do script
 
 function _verifDistro_() {
     #--------------------------------------------------------------------------------------------------------------------#
