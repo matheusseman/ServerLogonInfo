@@ -182,20 +182,23 @@ function _verifInstalacao_() {
     done
 
     # Ações para primeira execução do script #---------------------------------------------------------------------------#
-    if [[ $instalacaoValidacao = "true" ]] ; then  
+    if [[ $FUNC_SERVIDOR = "" ]] ; then  
         # Função do servidor #-------------------------------------------------------------------------------------------#
         _divisor_ "-" ; echo
 
         while true ; do
             read -p "Descreva de forma sucinta a função do servidor: " funcServidor
             if [[ ! -z $funcServidor ]] ; then
-                sed -i "s/^FUNC_SERVIDOR=.*/FUNC_SERVIDOR=\"$funcServidor\"/" "$0" ; break
-                break 
+                instalacaoValidacao="true"
+                sed -i "s/^FUNC_SERVIDOR=.*/FUNC_SERVIDOR=\"$funcServidor\"/" "$0"
+                break
+                
             else
                 echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Valor inválido! Informe a função do servidor.\n" ; sleep 1                
             fi
         done
-
+    fi
+    if [[ $IMPAC_SERVIDOR = "" ]] ; then  
         # Impacto do servidor #------------------------------------------------------------------------------------------#
         while true; do
             local regexpImpacto='^[AMB]' # Expressão regular para verificar a primeira letra (A, M, B)
@@ -215,12 +218,15 @@ function _verifInstalacao_() {
                         sed -i "s/^IMPAC_SERVIDOR=.*/IMPAC_SERVIDOR=\"\${CORES[azul]}Baixo\${CORES[none]}\"/" "$0" ; break
                     ;;
                 esac
+                instalacaoValidacao="true"
             else
                 echo -e "[ ${CORES[vermelho]}✖${CORES[none]} ] ~ Valor inválido, preencha com Alto, Médio ou Baixo." ; sleep 1             
             fi
         done
+    fi
 
-        # Finalização da instalação/configuração #-----------------------------------------------------------------------#
+    # Finalização da instalação/configuração #---------------------------------------------------------------------------#
+    if [[ $instalacaoValidacao = "true" ]] ; then
         echo ; _divisor_ "-"
 
         echo -e "\n[ ${CORES[verde]}✓${CORES[none]} ] ~ Instalação finalizada!"
