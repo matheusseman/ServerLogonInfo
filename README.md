@@ -28,6 +28,7 @@ Se estas dependências não estiverem instaladas, o script solicitará a permiss
 ## 🔧 Configuração
 Para que o script tenha seu funcionamento correto, devem ser respeitados alguns critérios:
 - O script deve ser alocado no diretório `/usr/local/bin`.
+- Deve receber permissão de execução com `chmod +x /usr/local/bin/serverLogonInfo.sh`.
 - Sua execução deve ser adicionada ao arquivo `.bashrc` de cada usuário para exibir as informações após o login.
 
 ## ✏️ Personalização
